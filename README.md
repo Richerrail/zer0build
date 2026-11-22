@@ -119,6 +119,71 @@ Un module généré avec zer0build, qui liste les jeux DOS trouvés et les lance
 |---|---|---|
 | ![dosgames 1](docs/dosgames-1.png) | ![dosgames 2](docs/dosgames-2.png) | ![dosgames 3](docs/dosgames-3.png) |
 
+## Registre de modules
+
+zer0build inclut un **registre** (index JSON) pour lister, publier et installer des modules, et les partager avec tout le monde.
+
+### Lister les modules disponibles
+
+```bash
+# Registre local (par défaut : ~/.config/zer0build/registry.json)
+zer0build registry list
+
+# Registre distant (URL http/https) ou fichier local
+zer0build registry list --source https://exemple.com/registry.json
+```
+
+### Publier un module
+
+Depuis le dossier du module (qui contient `zer0fun.toml`) :
+
+```bash
+zer0build registry publish --binary target/release/libmonmodule.so
+```
+
+Options :
+- `--registry <chemin>` : registre cible (défaut : `~/.config/zer0build/registry.json`)
+- `--url <URL>` : URL de téléchargement (défaut : `file://<chemin absolu>`)
+- `--homepage <URL>` : page du projet / dépôt source
+
+Le SHA-256 du binaire est calculé automatiquement et stocké dans l'entrée.
+
+### Installer un module depuis un registre
+
+```bash
+zer0build registry install <nom> --source <fichier|URL> [--force]
+```
+
+Le binaire est téléchargé (ou copié), son **SHA-256 est vérifié**, puis il est installé dans le dossier fun de zer0gh0st.
+
+### Partager un registre
+
+Le registre est un simple fichier JSON : publie-le sur GitHub (raw URL), un gist, ou n'importe quel hébergement statique. Les autres utilisateurs peuvent alors faire :
+
+```bash
+zer0build registry list --source https://raw.githubusercontent.com/<user>/<repo>/main/registry.json
+zer0build registry install monmodule --source https://raw.githubusercontent.com/<user>/<repo>/main/registry.json
+```
+
+### Format d'une entrée
+
+```json
+{
+  "name": "monmodule",
+  "version": "0.1.0",
+  "description": "Description courte",
+  "authors": ["Auteur"],
+  "license": "MIT",
+  "category": "tool",
+  "download_url": "https://.../libmonmodule.so",
+  "signature_url": null,
+  "sha256": "abc123...",
+  "target": "x86_64-unknown-linux-gnu",
+  "homepage": "https://github.com/...",
+  "published_at": "1795391736"
+}
+```
+
 ## Cibles de compilation
 
 `x86_64-unknown-linux-gnu`, `x86_64-unknown-linux-musl`, `aarch64-unknown-linux-gnu`, `x86_64-apple-darwin`, `aarch64-apple-darwin`, `x86_64-pc-windows-msvc`.

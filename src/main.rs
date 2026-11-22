@@ -8,6 +8,7 @@ mod compiler;
 mod signer;
 mod ai;
 mod config;
+mod registry;
 
 use anyhow::Result;
 
@@ -130,6 +131,51 @@ enum Commands {
         #[arg(short, long)]
         pubkey: Option<PathBuf>,
     },
+
+    /// Gère le registre de modules (liste, publie, installe)
+    Registry {
+        #[command(subcommand)]
+        action: RegistryAction,
+    },
+}
+
+#[derive(Subcommand)]
+enum RegistryAction {
+    /// Liste les modules d'un registre (local ou URL)
+    List {
+        /// Source du registre (fichier JSON ou URL http(s))
+        #[arg(short, long, default_value = "")]
+        source: String,
+    },
+    /// Publie le module courant dans le registre local
+    Publish {
+        /// Chemin du binaire compilé (.so/.dylib/.dll)
+        #[arg(short, long)]
+        binary: PathBuf,
+        /// Chemin du registre (défaut: ~/.config/zer0build/registry.json)
+        #[arg(short, long)]
+        registry: Option<PathBuf>,
+        /// URL de téléchargement (défaut: file://<chemin absolu>)
+        #[arg(short, long)]
+        url: Option<String>,
+        /// Page du projet / dépôt source
+        #[arg(long)]
+        homepage: Option<String>,
+    },
+    /// Installe un module depuis un registre
+    Install {
+        /// Nom du module
+        name: String,
+        /// Source du registre (fichier JSON ou URL http(s))
+        #[arg(short, long)]
+        source: String,
+        /// Répertoire d'installation
+        #[arg(short, long)]
+        target_dir: Option<PathBuf>,
+        /// Écrase si déjà installé
+        #[arg(short, long)]
+        force: bool,
+    },
 }
 
 #[tokio::main]
@@ -175,6 +221,22 @@ async fn main() -> Result<()> {
         Commands::Verify { path, pubkey } => {
             signer::verify_module(&path, pubkey).await?;
         }
+        Commands::Registry { action } => match action {
+            RegistryAction::List { source } => {
+                let src = if source.is_empty() {
+                    registry::default_registry_path().to_string_lossy().to_string()
+                } else {
+                    source
+                };
+                registry::list(&src).await?;
+            }
+            RegistryAction::Publish { binary, registry, url, homepage } => {
+                registry::publish(&binary, registry, url, homepage).await?;
+            }
+            RegistryAction::Install { name, source, target_dir, force } => {
+                registry::install_from_registry(&name, &source, target_dir, force).await?;
+            }
+        },
     }
     
     Ok(())

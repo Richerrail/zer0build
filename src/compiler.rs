@@ -232,6 +232,10 @@ fn find_compiled_module() -> Result<PathBuf> {
 }
 
 /// Répertoire d'installation par défaut.
+pub fn default_install_dir_public() -> PathBuf {
+    default_install_dir()
+}
+
 fn default_install_dir() -> PathBuf {
     #[cfg(target_os = "windows")]
     {
