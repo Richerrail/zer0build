@@ -111,6 +111,14 @@ pub trait FunModule: Send + Sync + 'static {
 }
 ```
 
+## Exemple : module dosgames
+
+Un module généré avec zer0build, qui liste les jeux DOS trouvés et les lance via DOSBox.
+
+| Liste des jeux | Sélection | Lancement |
+|---|---|---|
+| ![dosgames 1](docs/dosgames-1.png) | ![dosgames 2](docs/dosgames-2.png) | ![dosgames 3](docs/dosgames-3.png) |
+
 ## Cibles de compilation
 
 `x86_64-unknown-linux-gnu`, `x86_64-unknown-linux-musl`, `aarch64-unknown-linux-gnu`, `x86_64-apple-darwin`, `aarch64-apple-darwin`, `x86_64-pc-windows-msvc`.
