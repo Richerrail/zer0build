@@ -1,0 +1,91 @@
+# zer0build
+
+CLI pour créer, compiler, signer et installer des **modules fun** pour [zer0gh0st](https://github.com/Richerrail/zer0gh0st).
+
+![zer0build](docs/screenshot.png)
+
+## Prérequis
+
+**Installe d'abord zer0gh0st.** zer0build ne fonctionne pas seul : il s'appuie sur zer0gh0st pour deux choses essentielles :
+
+1. **La crate `zer0fun-api`** — elle définit l'API des modules (trait `FunModule`, `Meta`, `Context`, `Event`, `Buffer`, `Permissions`…). Sans elle, impossible de compiler un module.
+2. **Le mécanisme de signature** — zer0gh0st vérifie la signature Ed25519 de chaque module avant de le charger. Un module non signé est refusé.
+
+Autres prérequis :
+- Rust + Cargo (édition 2021)
+- `cargo` dans le `PATH`
+
+## Fonctionnement
+
+```
+zer0build new <nom> --template <type>   # génère un projet de module
+zer0build build --release               # compile en .so
+zer0build install                       # copie dans ~/.local/share/zer0gh0st/fun/ + signe
+```
+
+À l'installation, le module est copié dans le dossier `fun/` de zer0gh0st, **signé automatiquement** (Ed25519 sur hash SHA-256), puis chargé à chaud par zer0gh0st.
+
+## Commandes
+
+| Commande | Description |
+|---|---|
+| `zer0build new <nom>` | Crée un nouveau projet de module (`--template`, `--description`, `--author`) |
+| `zer0build build` | Compile le module courant (`--release`, `--target`, `--all`) |
+| `zer0build install` | Installe le `.so` dans le dossier fun de zer0gh0st et le signe (`--force`, `--target-dir`) |
+| `zer0build list` | Liste les modules installés |
+| `zer0build remove <nom>` | Désinstalle un module |
+| `zer0build ai <prompt>` | Génère un module via IA (OpenRouter) |
+| `zer0build sign <fichier>` | Signe un module existant |
+| `zer0build verify <fichier>` | Vérifie la signature d'un module |
+
+## Templates
+
+| Template | Description |
+|---|---|
+| `basic` | Module minimal avec compteur |
+| `game` | Jeu avec boucle et événements |
+| `visual` | Visualisation / animation |
+| `tool` | Outil / utilitaire |
+| `network` | Module avec accès réseau |
+
+## Structure d'un module
+
+```
+mon-module/
+├── Cargo.toml        # crate-type = ["cdylib"], dépend de zer0fun-api
+├── zer0fun.toml      # métadonnées (nom, version, auteur, permissions)
+└── src/
+    └── lib.rs        # implémentation du trait FunModule
+```
+
+Le trait `FunModule` expose :
+
+```rust
+pub trait FunModule: Send + Sync + 'static {
+    fn meta() -> Meta;
+    fn new(ctx: Context) -> Self;
+    fn on_mount(&mut self, ctx: &mut Context) {}
+    fn on_unmount(&mut self) {}
+    fn on_event(&mut self, ev: Event, ctx: &mut Context) -> bool;
+    fn on_tick(&mut self, ctx: &mut Context) {}
+    fn draw(&self, area: Rect, buf: &mut Buffer);
+    fn on_config_change(&mut self, ctx: &mut Context) {}
+}
+```
+
+## Cibles de compilation
+
+`x86_64-unknown-linux-gnu`, `x86_64-unknown-linux-musl`, `aarch64-unknown-linux-gnu`, `x86_64-apple-darwin`, `aarch64-apple-darwin`, `x86_64-pc-windows-msvc`.
+
+## Sécurité
+
+- Chaque module est **signé** (Ed25519) à l'installation ; zer0gh0st vérifie la signature avant chargement.
+- Les **permissions** sont déclarées dans `zer0fun.toml` : `network`, `fs_read`, `fs_write`, `process`, `clipboard`, `notifications`, `audio`.
+
+## Note sur l'arborescence
+
+Les modules générés référencent `zer0fun-api = { path = "../zer0fun-api" }`. Crée donc tes modules **à côté** de la crate `zer0fun-api` (ou ajuste le chemin dans le `Cargo.toml` généré pour pointer vers ton installation de zer0gh0st).
+
+## Licence
+
+MIT

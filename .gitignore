@@ -1,0 +1,14 @@
+# Build output
+/target
+
+# Backups
+*.zer0.bak
+
+# Config locale
+.zer0build.toml
+*.key
+*.sig
+
+# OS
+.DS_Store
+Thumbs.db

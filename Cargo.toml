@@ -1,0 +1,30 @@
+[package]
+name = "zer0build"
+version = "0.1.0"
+edition = "2021"
+description = "CLI pour construire des modules fun zer0gh0st"
+license = "MIT"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+tokio = { version = "1.40", features = ["full"] }
+reqwest = { version = "0.12", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+thiserror = "1.0"
+toml = "0.8"
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+sha2 = "0.10"
+hex = "0.4"
+dirs = "5.0"
+which = "6.0"
+zip = "2.2"
+tar = "0.4"
+flate2 = "1.0"
+rand = "0.8"
+env_logger = "0.11"
+log = "0.4"
+
+[dev-dependencies]
+tempfile = "3.10"
