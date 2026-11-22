@@ -15,6 +15,44 @@ Autres prérequis :
 - Rust + Cargo (édition 2021)
 - `cargo` dans le `PATH`
 
+## Installation
+
+### Depuis les sources (recommandé)
+
+```bash
+git clone https://github.com/Richerrail/zer0build.git
+cd zer0build
+cargo build --release
+```
+
+Le binaire est dans `target/release/zer0build`. Copie-le dans ton `PATH` :
+
+```bash
+# Linux / macOS
+sudo cp target/release/zer0build /usr/local/bin/
+
+# Windows (PowerShell)
+Copy-Item target\release\zer0build.exe "$env:USERPROFILE\.cargo\bin\"
+```
+
+### Vérifier l'installation
+
+```bash
+zer0build --help
+```
+
+### Configuration (optionnel)
+
+Un fichier de config peut être créé dans `~/.config/zer0build/config.toml` :
+
+```toml
+install_dir = "/home/toi/.local/share/zer0gh0st/fun"
+openrouter_api_key = "sk-or-v1-..."
+default_model = "anthropic/claude-3.5-sonnet"
+```
+
+La clé OpenRouter peut aussi être passée via la variable d'environnement `OPENROUTER_API_KEY`.
+
 ## Fonctionnement
 
 ```
