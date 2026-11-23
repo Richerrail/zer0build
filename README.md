@@ -170,6 +170,20 @@ zer0build registry list --source https://raw.githubusercontent.com/<user>/<repo>
 zer0build registry install monmodule --source https://raw.githubusercontent.com/<user>/<repo>/main/registry.json
 ```
 
+### Registre officiel : zer0fun-modules
+
+Le registre communautaire est hébergé sur [Richerrail/zer0fun-modules](https://github.com/Richerrail/zer0fun-modules) :
+
+```bash
+# Lister les modules disponibles
+zer0build registry list --source https://raw.githubusercontent.com/Richerrail/zer0fun-modules/main/registry.json
+
+# Installer un module
+zer0build registry install dosgames --source https://raw.githubusercontent.com/Richerrail/zer0fun-modules/main/registry.json
+```
+
+Pour y publier un module, ouvre une PR sur ce dépôt avec ton `registry.json` mis à jour et une GitHub Release contenant le `.so`.
+
 ### Format d'une entrée
 
 ```json
