@@ -75,6 +75,11 @@ zer0build install                       # copie dans ~/.local/share/zer0gh0st/fu
 | `zer0build ai <prompt>` | Génère un module via IA (OpenRouter) |
 | `zer0build sign <fichier>` | Signe un module existant |
 | `zer0build verify <fichier>` | Vérifie la signature d'un module |
+| `zer0build registry list` | Liste les modules d'un registre |
+| `zer0build registry publish` | Publie un module dans le registre |
+| `zer0build registry install` | Installe un module depuis un registre |
+| `zer0build registry remove <nom>` | Retire un module d'un registre local |
+| `zer0build config` | Affiche ou modifie la configuration (`--show`, `--install-dir`, `--openrouter-api-key`, `--default-model`) |
 
 ## Templates
 
@@ -183,6 +188,28 @@ zer0build registry install monmodule --source https://raw.githubusercontent.com/
   "published_at": "1795391736"
 }
 ```
+
+## Configuration
+
+zer0build lit un fichier de configuration optionnel dans `~/.config/zer0build/config.toml` (Windows : `%APPDATA%\zer0build\config.toml`).
+
+```bash
+# Afficher la configuration actuelle
+zer0build config --show
+
+# Modifier des valeurs
+zer0build config --default-model "moonshotai/kimi-latest"
+zer0build config --install-dir /chemin/vers/fun
+zer0build config --openrouter-api-key "sk-or-v1-..."
+```
+
+Les valeurs de config servent de **valeurs par défaut** : les arguments CLI ont toujours priorité. Ordre de résolution :
+
+| Réglage | Priorité |
+|---|---|
+| Clé OpenRouter | `--api-key` > `OPENROUTER_API_KEY` > `config.toml` |
+| Répertoire d'installation | `--target-dir` > `config.toml` > défaut (`~/.local/share/zer0gh0st/fun`) |
+| Modèle OpenRouter | `--model` > `config.toml` > défaut |
 
 ## Cibles de compilation
 

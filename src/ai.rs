@@ -76,11 +76,13 @@ pub async fn generate_module(
     model: &str,
     api_key: Option<String>,
 ) -> Result<()> {
-    // Récupérer la clé API
+    // Récupérer la clé API : argument > variable d'env > fichier de config
+    let cfg = crate::config::Config::load().unwrap_or_default();
     let api_key = api_key
         .or_else(|| std::env::var("OPENROUTER_API_KEY").ok())
+        .or(cfg.openrouter_api_key)
         .ok_or_else(|| anyhow!(
-            "clé API OpenRouter requise. Définir OPENROUTER_API_KEY ou utiliser --api-key"
+            "clé API OpenRouter requise. Définir OPENROUTER_API_KEY, utiliser --api-key, ou renseigner openrouter_api_key dans ~/.config/zer0build/config.toml"
         ))?;
     
     let client = OpenRouterClient::new(api_key, model.to_string());

@@ -115,8 +115,10 @@ pub async fn install(
         return Err(anyhow!("fichier non trouvé: {}", so_path.display()));
     }
     
-    // Déterminer le répertoire d'installation
-    let install_dir = target_dir.unwrap_or_else(default_install_dir);
+    // Déterminer le répertoire d'installation : argument > config > défaut
+    let install_dir = target_dir
+        .or_else(|| crate::config::Config::load().ok().and_then(|c| c.install_dir))
+        .unwrap_or_else(default_install_dir);
     std::fs::create_dir_all(&install_dir)?;
     
     // Nom du module
@@ -149,7 +151,9 @@ pub async fn install(
 
 /// Liste les modules installés.
 pub async fn list_installed(target_dir: Option<PathBuf>) -> Result<()> {
-    let install_dir = target_dir.unwrap_or_else(default_install_dir);
+    let install_dir = target_dir
+        .or_else(|| crate::config::Config::load().ok().and_then(|c| c.install_dir))
+        .unwrap_or_else(default_install_dir);
     
     if !install_dir.exists() {
         println!("Aucun module installé (répertoire {} inexistant)", install_dir.display());
@@ -183,7 +187,9 @@ pub async fn list_installed(target_dir: Option<PathBuf>) -> Result<()> {
 
 /// Supprime un module installé.
 pub async fn remove(name: &str, target_dir: Option<PathBuf>) -> Result<()> {
-    let install_dir = target_dir.unwrap_or_else(default_install_dir);
+    let install_dir = target_dir
+        .or_else(|| crate::config::Config::load().ok().and_then(|c| c.install_dir))
+        .unwrap_or_else(default_install_dir);
     let path = install_dir.join(format!("{}.so", name));
     
     if !path.exists() {

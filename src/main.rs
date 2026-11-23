@@ -132,6 +132,22 @@ enum Commands {
         pubkey: Option<PathBuf>,
     },
 
+    /// Affiche ou modifie la configuration (~/.config/zer0build/config.toml)
+    Config {
+        /// Répertoire d'installation par défaut des modules
+        #[arg(long)]
+        install_dir: Option<PathBuf>,
+        /// Clé API OpenRouter par défaut
+        #[arg(long)]
+        openrouter_api_key: Option<String>,
+        /// Modèle OpenRouter par défaut
+        #[arg(long)]
+        default_model: Option<String>,
+        /// Affiche la configuration actuelle (sans modifier)
+        #[arg(long)]
+        show: bool,
+    },
+
     /// Gère le registre de modules (liste, publie, installe)
     Registry {
         #[command(subcommand)]
@@ -175,6 +191,14 @@ enum RegistryAction {
         /// Écrase si déjà installé
         #[arg(short, long)]
         force: bool,
+    },
+    /// Retire un module d'un registre local
+    Remove {
+        /// Nom du module
+        name: String,
+        /// Chemin du registre (défaut : ~/.config/zer0build/registry.json)
+        #[arg(short, long)]
+        registry: Option<PathBuf>,
     },
 }
 
@@ -221,6 +245,19 @@ async fn main() -> Result<()> {
         Commands::Verify { path, pubkey } => {
             signer::verify_module(&path, pubkey).await?;
         }
+        Commands::Config { install_dir, openrouter_api_key, default_model, show } => {
+            let mut cfg = config::Config::load().unwrap_or_default();
+            if show || (install_dir.is_none() && openrouter_api_key.is_none() && default_model.is_none()) {
+                println!("{}", toml::to_string_pretty(&cfg).unwrap_or_default());
+                println!("# Fichier : {}", config::Config::path_display());
+            } else {
+                if let Some(d) = install_dir { cfg.install_dir = Some(d); }
+                if let Some(k) = openrouter_api_key { cfg.openrouter_api_key = Some(k); }
+                if let Some(m) = default_model { cfg.default_model = m; }
+                cfg.save()?;
+                println!("✅ Configuration sauvegardée : {}", config::Config::path_display());
+            }
+        }
         Commands::Registry { action } => match action {
             RegistryAction::List { source } => {
                 let src = if source.is_empty() {
@@ -235,6 +272,9 @@ async fn main() -> Result<()> {
             }
             RegistryAction::Install { name, source, target_dir, force } => {
                 registry::install_from_registry(&name, &source, target_dir, force).await?;
+            }
+            RegistryAction::Remove { name, registry } => {
+                registry::remove_from_registry(&name, registry).await?;
             }
         },
     }

@@ -266,7 +266,9 @@ pub async fn install_from_registry(
     let entry = reg.find(name)
         .ok_or_else(|| anyhow!("module '{}' introuvable dans le registre", name))?;
 
-    let install_dir = target_dir.unwrap_or_else(crate::compiler::default_install_dir_public);
+    let install_dir = target_dir
+        .or_else(|| crate::config::Config::load().ok().and_then(|c| c.install_dir))
+        .unwrap_or_else(crate::compiler::default_install_dir_public);
     std::fs::create_dir_all(&install_dir)?;
 
     let dest = install_dir.join(format!("{}.so", name));
@@ -307,6 +309,22 @@ fn compute_sha256(path: &Path) -> Result<String> {
     let mut hasher = Sha256::new();
     hasher.update(&data);
     Ok(hex::encode(hasher.finalize()))
+}
+
+/// Retire un module d'un registre local.
+pub async fn remove_from_registry(name: &str, registry_path: Option<PathBuf>) -> Result<()> {
+    let reg_path = registry_path.unwrap_or_else(default_registry_path);
+    if !reg_path.exists() {
+        return Err(anyhow!("registre introuvable: {}", reg_path.display()));
+    }
+    let mut reg = Registry::load(reg_path.to_str().unwrap_or("")).await?;
+    if reg.remove(name) {
+        reg.save(&reg_path)?;
+        println!("✅ Module '{}' retiré du registre {}", name, reg_path.display());
+        Ok(())
+    } else {
+        Err(anyhow!("module '{}' introuvable dans le registre", name))
+    }
 }
 
 /// Date RFC3339 approximative (sans dépendance chrono).

@@ -54,6 +54,11 @@ impl Config {
         Ok(())
     }
     
+    /// Chemin du fichier de configuration (affichage).
+    pub fn path_display() -> String {
+        Self::config_path().display().to_string()
+    }
+
     /// Chemin du fichier de configuration.
     fn config_path() -> PathBuf {
         #[cfg(target_os = "windows")]
